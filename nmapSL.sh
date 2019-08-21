@@ -10,11 +10,12 @@
 #Setting variables
 
 #Help text
-usage="$(basename "$0") [-h] -- This script will detect all open ports on the target and then run service detection on those specific ports.
+usage="$(basename "$0") [hostname] [-h] -- This script will detect all open ports on the target and then run service detection on those specific ports.
 
 where:
--h  show this help text"
+  -h  show this help text"
 
+#Parse cli arguments
 while getopts ":h" opt; do
 	case ${opt} in
 		h )
@@ -29,6 +30,11 @@ while getopts ":h" opt; do
 done
 shift $((OPTIND -1))
 
+#Check to see if ip has been passed as an agrument.  If so set hostname to first argument
+if [ -n $1 ]
+then
+	hostname="$1"
+fi
 
 #Creating directory to save temporary files
 mkdir ~/nmapSL_RUN
@@ -37,7 +43,11 @@ cd ~/nmapSL_RUN
 #Prompting user for input details regarding scan
 #Asking for hostname/IP, and saving results to the $hastname variable
 printf "\nThis script will scan the provided IP/Hostname over all possible ports and return the open ports, services running on those ports, and perform OS detection on the host.\n\nScan type is NMAP DEFAULT\n\nOpen ports will be collected first with no service scanning, then the open scans will be specifically scanned for services running over those ports\n\n\n"
-read -p "Enter Target IP/Hostname: " hostname
+#Check if hostname previously has been set and if so skip prompt
+if [ -z $hostname ]
+then
+	read -p "Enter Target IP/Hostname: " hostname
+fi
 
 #defining function that will later be used to concatinate all open ports discovered, and seperate them by a comma so they can be passed into the service discovery scan 
 function join_by { local IFS="$1"; shift; echo "$*"; }
